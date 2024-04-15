@@ -4,14 +4,6 @@ from gensim.models import Word2Vec, KeyedVectors
 from gensim.utils import simple_preprocess
 from sklearn.metrics.pairwise import cosine_similarity
 
-
-# def explore_data():
-#     df = pd.read_csv("./Data/tmdb_all_data.csv", lineterminator='\n')
-#     new_df = df.dropna()
-#     for d in new_df:
-#         print(d)
-#     print(new_df['video'])
-
 def train():
     #read in data
     df = pd.read_csv("./Data/tmdb_all_data.csv", lineterminator='\n')
@@ -23,7 +15,7 @@ def train():
     #tokenize content
     df['tokenized_content'] = df['content'].apply(simple_preprocess)
     #initialize word2vec model
-    model = Word2Vec(vector_size=100, window=5, min_count=1, workers=4)
+    model = Word2Vec(vector_size=300, window=5, min_count=1, workers=4, sg=1, alpha=0.01)
 
     #build vocabulary
     model.build_vocab(df['tokenized_content'])
@@ -66,7 +58,7 @@ def reccommend(model, movie):
     df['content'] = df['content'].fillna('')
     #tokenize content
     df['tokenized_content'] = df['content'].apply(simple_preprocess)
-    w2v_feature_array = average_word_vectorizer(corpus=df['tokenized_content'], model=model, num_features=100)
+    w2v_feature_array = average_word_vectorizer(corpus=df['tokenized_content'], model=model, num_features=300)
     movie_index = df[df['title'] == movie].index[0]
     user_movie_vector = w2v_feature_array[movie_index].reshape(1, -1)
     similarity_scores = cosine_similarity(user_movie_vector, w2v_feature_array)
